@@ -1114,7 +1114,7 @@ int lgw_start(void) {
         }
         if (i == sizeof I2C_PORT_TEMP_SENSOR) {
             printf("ERROR: no temperature sensor found.\n");
-			// For RAK2287 this is expected to fail as it has no temperature sensor.
+            // For RAK2287 this is expected to fail as it has no temperature sensor.
             // return LGW_HAL_ERROR;
         }
 
@@ -1223,11 +1223,13 @@ int lgw_stop(void) {
     }
 
     if (CONTEXT_COM_TYPE == LGW_COM_SPI) {
-        DEBUG_MSG("INFO: Closing I2C for temperature sensor\n");
-        x = i2c_linuxdev_close(ts_fd);
-        if (x != 0) {
-            printf("ERROR: failed to close I2C temperature sensor device (err=%i)\n", x);
-            err = LGW_HAL_ERROR;
+        if (ts_fd != -1) {
+            DEBUG_MSG("INFO: Closing I2C for temperature sensor\n");
+            x = i2c_linuxdev_close(ts_fd);
+            if (x != 0) {
+                printf("ERROR: failed to close I2C temperature sensor device (err=%i)\n", x);
+                err = LGW_HAL_ERROR;
+            }
         }
 
         if (CONTEXT_BOARD.full_duplex == true) {
@@ -1291,7 +1293,7 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
     res = lgw_get_temperature(&current_temperature);
     if (res != LGW_I2C_SUCCESS) {
         printf("ERROR: failed to get current temperature\n");
-		// For RAK2287 this is expected to fail as it has no temperature sensor.
+        // For RAK2287 this is expected to fail as it has no temperature sensor.
         // return LGW_HAL_ERROR;
     }
 
