@@ -209,6 +209,9 @@ static uint8_t ts_addr = 0xFF;
 /* I2C AD5338 handles */
 static int     ad_fd = -1;
 
+/* I2C device */
+char i2c_device[50];
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 
@@ -447,6 +450,17 @@ static int merge_packets(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt) {
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
+
+int i2c_set_path(const char *path) {
+    if (path) {
+        strcpy(i2c_device, path);
+        DEBUG_PRINTF("Setting I2C device: %s\n", i2c_device);
+        return LGW_I2C_SUCCESS;
+    }
+    else {
+        return LGW_I2C_ERROR;
+    }
+}
 
 int lgw_board_setconf(struct lgw_conf_board_s * conf) {
     CHECK_NULL(conf);
@@ -1096,7 +1110,7 @@ int lgw_start(void) {
         /* Find the temperature sensor on the known supported ports */
         for (i = 0; i < (int)(sizeof I2C_PORT_TEMP_SENSOR); i++) {
             ts_addr = I2C_PORT_TEMP_SENSOR[i];
-            err = i2c_linuxdev_open(I2C_DEVICE, ts_addr, &ts_fd);
+            err = i2c_linuxdev_open(i2c_device, ts_addr, &ts_fd);
             if (err != LGW_I2C_SUCCESS) {
                 printf("ERROR: failed to open I2C for temperature sensor on port 0x%02X\n", ts_addr);
                 return LGW_HAL_ERROR;
@@ -1120,7 +1134,7 @@ int lgw_start(void) {
 
         /* Configure ADC AD338R for full duplex (CN490 reference design) */
         if (CONTEXT_BOARD.full_duplex == true) {
-            err = i2c_linuxdev_open(I2C_DEVICE, I2C_PORT_DAC_AD5338R, &ad_fd);
+            err = i2c_linuxdev_open(i2c_device, I2C_PORT_DAC_AD5338R, &ad_fd);
             if (err != LGW_I2C_SUCCESS) {
                 printf("ERROR: failed to open I2C for ad5338r\n");
                 return LGW_HAL_ERROR;

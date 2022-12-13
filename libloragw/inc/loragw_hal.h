@@ -404,6 +404,12 @@ typedef enum lgw_spectral_scan_status_e {
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
 /**
+@brief Set I2C device
+@param path         Path to the I2C device driver
+*/
+int i2c_set_path(const char *path);
+
+/**
 @brief Configure the gateway board
 @param conf structure containing the configuration parameters
 @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
