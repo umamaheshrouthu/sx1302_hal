@@ -404,10 +404,16 @@ typedef enum lgw_spectral_scan_status_e {
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
 /**
-@brief Set I2C device
+@brief Set I2C device path
 @param path         Path to the I2C device driver
 */
-int i2c_set_path(const char *path);
+int lgw_i2c_set_path(const char *path);
+
+/**
+@brief Set I2C temperature sensor address
+@param addr         Address of the I2C temperature sensor.
+*/
+int lgw_i2c_set_temp_sensor_addr(uint8_t addr);
 
 /**
 @brief Configure the gateway board

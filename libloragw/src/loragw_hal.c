@@ -210,7 +210,7 @@ static uint8_t ts_addr = 0xFF;
 static int     ad_fd = -1;
 
 /* I2C device */
-char i2c_device[50];
+static char i2c_device[50];
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -451,7 +451,7 @@ static int merge_packets(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt) {
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
-int i2c_set_path(const char *path) {
+int lgw_i2c_set_path(const char *path) {
     if (path) {
         strcpy(i2c_device, path);
         DEBUG_PRINTF("Setting I2C device: %s\n", i2c_device);
@@ -460,6 +460,11 @@ int i2c_set_path(const char *path) {
     else {
         return LGW_I2C_ERROR;
     }
+}
+
+int lgw_i2c_set_temp_sensor_addr(uint8_t addr) {
+    ts_addr = addr;
+    return LGW_I2C_SUCCESS;
 }
 
 int lgw_board_setconf(struct lgw_conf_board_s * conf) {
@@ -1107,9 +1112,7 @@ int lgw_start(void) {
     dbg_init_random();
 
     if (CONTEXT_COM_TYPE == LGW_COM_SPI) {
-        /* Find the temperature sensor on the known supported ports */
-        for (i = 0; i < (int)(sizeof I2C_PORT_TEMP_SENSOR); i++) {
-            ts_addr = I2C_PORT_TEMP_SENSOR[i];
+        if (ts_addr != 0xFF) {
             err = i2c_linuxdev_open(i2c_device, ts_addr, &ts_fd);
             if (err != LGW_I2C_SUCCESS) {
                 printf("ERROR: failed to open I2C for temperature sensor on port 0x%02X\n", ts_addr);
@@ -1121,15 +1124,7 @@ int lgw_start(void) {
                 printf("INFO: no temperature sensor found on port 0x%02X\n", ts_addr);
                 i2c_linuxdev_close(ts_fd);
                 ts_fd = -1;
-            } else {
-                printf("INFO: found temperature sensor on port 0x%02X\n", ts_addr);
-                break;
             }
-        }
-        if (i == sizeof I2C_PORT_TEMP_SENSOR) {
-            printf("ERROR: no temperature sensor found.\n");
-            // For RAK2287 this is expected to fail as it has no temperature sensor.
-            // return LGW_HAL_ERROR;
         }
 
         /* Configure ADC AD338R for full duplex (CN490 reference design) */
@@ -1304,11 +1299,12 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
     }
 
     /* Apply RSSI temperature compensation */
-    res = lgw_get_temperature(&current_temperature);
-    if (res != LGW_I2C_SUCCESS) {
-        printf("ERROR: failed to get current temperature\n");
-        // For RAK2287 this is expected to fail as it has no temperature sensor.
-        // return LGW_HAL_ERROR;
+    if (ts_fd != -1) {
+        res = lgw_get_temperature(&current_temperature);
+        if (res != LGW_I2C_SUCCESS) {
+            printf("ERROR: failed to get current temperature\n");
+            return LGW_HAL_ERROR;
+        }
     }
 
     /* Iterate on the RX buffer to get parsed packets */
