@@ -300,19 +300,12 @@ static int remove_pkt(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt, uint8_t pkt_ind
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int compare_pkt_tmst(const void *a, const void *b, void *arg)
+int compare_pkt_tmst(const void *a, const void *b)
 {
-    struct lgw_pkt_rx_s *p = (struct lgw_pkt_rx_s *)a;
-    struct lgw_pkt_rx_s *q = (struct lgw_pkt_rx_s *)b;
-    int *counter = (int *)arg;
     int p_count, q_count;
 
-    p_count = p->count_us;
-    q_count = q->count_us;
-
-    if (p_count > q_count) {
-        *counter = *counter + 1;
-    }
+    p_count = ((struct lgw_pkt_rx_s *)a)->count_us;
+    q_count = ((struct lgw_pkt_rx_s *)b)->count_us;
 
     return (p_count - q_count);
 }
