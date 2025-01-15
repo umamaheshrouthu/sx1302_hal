@@ -144,7 +144,7 @@ static bool fwd_error_pkt = false; /* packets with PAYLOAD CRC ERROR are NOT for
 static bool fwd_nocrc_pkt = false; /* packets with NO PAYLOAD CRC are NOT forwarded */
 
 /* network configuration variables */
-static uint64_t lgwm = 0; /* Lora gateway MAC address */
+static uint64_t lgwm = 0xa84041ffff288c68; /* Lora gateway MAC address */
 static char serv_addr[64] = STR(DEFAULT_SERVER); /* address of the server (host name or IPv4/IPv6) */
 static char serv_port_up[8] = STR(DEFAULT_PORT_UP); /* server port for upstream traffic */
 static char serv_port_down[8] = STR(DEFAULT_PORT_DW); /* server port for downstream traffic */
@@ -1035,12 +1035,13 @@ static int parse_gateway_configuration(const char * conf_file) {
     }
 
     /* gateway unique identifier (aka MAC address) (optional) */
-    str = json_object_get_string(conf_obj, "gateway_ID");
+    /*str = json_object_get_string(conf_obj, "gateway_ID");
     if (str != NULL) {
         sscanf(str, "%llx", &ull);
         lgwm = ull;
         MSG("INFO: gateway MAC address is configured to %016llX\n", ull);
-    }
+    }*/
+     MSG("INFO: gateway1 MAC address is configured to %016llX\n", lgwm);
 
     /* server hostname or IP address (optional) */
     str = json_object_get_string(conf_obj, "server_address");
